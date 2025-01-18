@@ -69,17 +69,27 @@ class Pipe:
 
 # Function to display the start screen
 def show_start_screen():
+    # Draw the background
     screen.blit(BACKGROUND_IMAGE, (0, 0))
-    font = pygame.font.Font(None, 74)
-    text = font.render("Flappy Bird", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 3))
     
+    # Draw the game title
+    font = pygame.font.Font(None, 74)
+    text = font.render("Niggesh Bird", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 4))
+    
+    # Draw the bird image
+    bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.blit(BIRD_IMAGE, bird_rect)
+    
+    # Draw the start instruction
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to Start", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
     
+    # Update the display
     pygame.display.flip()
     
+    # Wait for the player to press SPACE or quit
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -90,21 +100,24 @@ def show_start_screen():
                 if event.key == pygame.K_SPACE:
                     waiting = False
     return True
-
 # Function to display the game over screen
 def show_game_over_screen(score):
     screen.blit(BACKGROUND_IMAGE, (0, 0))
     font = pygame.font.Font(None, 74)
     text = font.render("Game Over", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 3))
+
+        # Draw the bird image
+    bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.blit(BIRD_IMAGE, bird_rect)
     
     font = pygame.font.Font(None, 36)
     text = font.render(f"Score: {score}", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
     
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to Restart", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.2))
     
     pygame.display.flip()
     
