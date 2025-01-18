@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 # Initialize Pygame
 pygame.init()
@@ -26,10 +27,13 @@ PIPE_FREQUENCY = 1500  # milliseconds
 
 # Setup screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Flappy Bird Clone")
+pygame.display.set_caption("Niggesh Bird")
 
 # Clock to control frame rate
 clock = pygame.time.Clock()
+
+# Scoreboard file
+SCOREBOARD_FILE = 'scoreboard.txt'
 
 # Bird class
 class Bird:
@@ -67,29 +71,34 @@ class Pipe:
         surface.blit(self.image_top, self.rect_top)
         surface.blit(self.image_bottom, self.rect_bottom)
 
+# Function to load scores from file
+def load_scores():
+    if not os.path.exists(SCOREBOARD_FILE):
+        return []
+    with open(SCOREBOARD_FILE, 'r') as file:
+        scores = [line.strip().split(',') for line in file]
+        scores = [(name, int(score)) for name, score in scores]
+        scores.sort(key=lambda x: x[1], reverse=True)
+    return scores
+
+# Function to save scores to file
+def save_scores(scores):
+    with open(SCOREBOARD_FILE, 'w') as file:
+        for name, score in scores:
+            file.write(f"{name},{score}\n")
+
 # Function to display the start screen
 def show_start_screen():
-    # Draw the background
     screen.blit(BACKGROUND_IMAGE, (0, 0))
-    
-    # Draw the game title
     font = pygame.font.Font(None, 74)
     text = font.render("Niggesh Bird", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 4))
-    
-    # Draw the bird image
     bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     screen.blit(BIRD_IMAGE, bird_rect)
-    
-    # Draw the start instruction
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to Start", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
-    
-    # Update the display
     pygame.display.flip()
-    
-    # Wait for the player to press SPACE or quit
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -100,27 +109,40 @@ def show_start_screen():
                 if event.key == pygame.K_SPACE:
                     waiting = False
     return True
+
 # Function to display the game over screen
 def show_game_over_screen(score):
+    scores = load_scores()
+    if len(scores) < 5 or score > scores[-1][1]:
+        name = get_player_name()
+        scores.append((name, score))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        if len(scores) > 5:
+            scores = scores[:5]
+        save_scores(scores)
+
     screen.blit(BACKGROUND_IMAGE, (0, 0))
     font = pygame.font.Font(None, 74)
     text = font.render("Game Over", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 3))
-
-        # Draw the bird image
     bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
     screen.blit(BIRD_IMAGE, bird_rect)
-    
     font = pygame.font.Font(None, 36)
     text = font.render(f"Score: {score}", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
-    
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to Restart", True, BLACK)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.2))
-    
+
+    # Display scoreboard
+    font = pygame.font.Font(None, 36)
+    y_offset = SCREEN_HEIGHT // 1.5 + 50
+    for i, (name, scr) in enumerate(scores):
+        text = font.render(f"{i+1}. {name}: {scr}", True, BLACK)
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
+        y_offset += 30
+
     pygame.display.flip()
-    
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -132,9 +154,38 @@ def show_game_over_screen(score):
                     waiting = False
     return True
 
+# Function to get player name
+def get_player_name():
+    name = ""
+    font = pygame.font.Font(None, 36)
+    input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 32)
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    color = color_inactive
+    active = True
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return "Player"
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        return name if name else "Player"
+                    elif event.key == pygame.K_BACKSPACE:
+                        name = name[:-1]
+                    else:
+                        name += event.unicode
 
+        screen.blit(BACKGROUND_IMAGE, (0, 0))
+        txt_surface = font.render(name, True, color)
+        width = max(200, txt_surface.get_width()+10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
+        pygame.draw.rect(screen, color, input_box, 2)
+        pygame.display.flip()
+        clock.tick(30)
 
-# Main game function
 # Main game function
 def main():
     if not show_start_screen():
