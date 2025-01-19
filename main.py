@@ -124,14 +124,59 @@ def show_game_over_screen(score):
     screen.blit(BACKGROUND_IMAGE, (0, 0))
     font = pygame.font.Font(None, 74)
     text = font.render("Game Over", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 3))
-    bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 9))
+    bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4.5))
     screen.blit(BIRD_IMAGE, bird_rect)
     font = pygame.font.Font(None, 36)
     text = font.render(f"Score: {score}", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.5))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2.5))
+    font = pygame.font.Font(None, 36)
+# Function to display the game over screen
+def show_game_over_screen(score):
+    scores = load_scores()
+    if len(scores) < 5 or score > scores[-1][1]:
+        name = get_player_name()
+        scores.append((name, score))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        if len(scores) > 5:
+            scores = scores[:5]
+        save_scores(scores)
+
+    screen.blit(BACKGROUND_IMAGE, (0, 0))
+    font = pygame.font.Font(None, 74)
+    text = font.render("Game Over", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 9))
+
+    bird_rect = BIRD_IMAGE.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4.5))
+    screen.blit(BIRD_IMAGE, bird_rect)
+
+    font = pygame.font.Font(None, 36)
+    text = font.render(f"Score: {score}", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2.5))
+
     font = pygame.font.Font(None, 36)
     text = font.render("Press SPACE to Restart", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.2))
+
+    # Display scoreboard
+    font = pygame.font.Font(None, 36)
+    y_offset = SCREEN_HEIGHT // 2  # Adjusted y_offset to place the scoreboard higher
+    for i, (name, scr) in enumerate(scores):
+        text = font.render(f"{i+1}. {name}: {scr}", True, BLACK)
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
+        y_offset += 40
+
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    waiting = False
+    return True
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 1.2))
 
     # Display scoreboard
@@ -140,7 +185,7 @@ def show_game_over_screen(score):
     for i, (name, scr) in enumerate(scores):
         text = font.render(f"{i+1}. {name}: {scr}", True, BLACK)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
-        y_offset += 30
+        y_offset += 40
 
     pygame.display.flip()
     waiting = True
@@ -156,7 +201,8 @@ def show_game_over_screen(score):
 
 # Function to get player name
 def get_player_name():
-    name = ""
+
+    name = "Player"
     font = pygame.font.Font(None, 36)
     input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 32)
     color_inactive = pygame.Color('lightskyblue3')
